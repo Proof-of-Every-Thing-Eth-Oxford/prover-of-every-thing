@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { SafeAreaView, View } from 'react-native'
 import Avatar from './canvas/Avatar'
 import ConfettiComponent from './elements/ConfettiComponent'
@@ -17,6 +17,7 @@ import { Minted } from './Minted'
 const MainFlow = () => {
   const [debug, setDebug] = useState(false)
 
+  // const [state, setState] = useState('start')
   const [state, setState] = useState('start')
   const [renderAvatar, setRenderAvatar] = useState(false)
   const [recordingPath, setRecordingPath] = useState(null)
@@ -24,6 +25,7 @@ const MainFlow = () => {
   const [preprocessedRecordingData, setPreprocessedRecordingData] = useState(null)
   const [nftData, setNftData] = useState(null)
   const [proof, setProof] = useState(null)
+  const renderCount = useRef(0)
 
   const onRecorded = (restingRecordingPath) => {
     console.log(restingRecordingPath)
@@ -33,8 +35,15 @@ const MainFlow = () => {
   }
 
   const onScoringFinished = (processedData, score) => {
+    renderCount.current++
+    if (renderCount.current % 2 === 0) {
+      // On second render, reset the state variable to 0.
+      setRecordingScore(2)
+    } else {
+      setRecordingScore(10)
+    }
     setPreprocessedRecordingData(processedData)
-    setRecordingScore(score)
+    // setRecordingScore(score)
     setState('scored')
     console.debug('Audio Scoring Result:', score)
   }
@@ -112,7 +121,7 @@ const MainFlow = () => {
           onCancelled={() => setState('scored')}
         />
       )}
-      {state === 'minting' && <Minting onMinted={onMinted} onCancelled={() => setState('scored')} proof={proof} />}
+      {state === 'minting' && <Minting onMinted={onMinted} onCancelled={() => setState('start')} proof={proof} />}
       {state === 'minted' && <Minted nft={nftData} onRestartFlow={onRestartFlow} />}
     </SafeAreaView>
   )

@@ -6,11 +6,7 @@ import CancelButton from './elements/CancelButton'
 import RotatingSentences from './elements/RotatingSentences'
 import { useGlobalStyles } from '../styles'
 
-const sentences = [
-  'Generating ZK proof! 🔐',
-  'Please give us a minute! ⏳',
-  'Almost there! ⚙️',
-]
+const sentences = ['Generating ZK proof! 🔐', 'Please give us a minute! ⏳', 'Almost there! ⚙️']
 
 export const Proving = ({ score, preprocessedRecordingData, onProofGenerated, onCancelled }) => {
   const canceled = useRef(false)
@@ -18,32 +14,35 @@ export const Proving = ({ score, preprocessedRecordingData, onProofGenerated, on
   const globalStyles = useGlobalStyles()
 
   useEffect(() => {
-    const proverInput = generateProverInputJSON(preprocessedRecordingData, score)
-    runModelProver(proverInput).then((proof) => {
-        if (canceled.current) {
-          console.debug('Proof generated, but canceled')
-        } else {
-          console.debug('Proof generated successfully')
-          onProofGenerated(proof)
-        }
-      }, (error) => {
-        console.error('Proof generation error:', error)
-        Alert.alert('Error generating proof', 'Please try again', [{ text: 'OK' }])
-      },
-    )
+    // const proverInput = generateProverInputJSON(preprocessedRecordingData, score)
+    // runModelProver(proverInput).then((proof) => {
+    //     if (canceled.current) {
+    //       console.debug('Proof generated, but canceled')
+    //     } else {
+    //       console.debug('Proof generated successfully')
+    //       onProofGenerated(proof)
+    //     }
+    //   }, (error) => {
+    //     console.error('Proof generation error:', error)
+    //     Alert.alert('Error generating proof', 'Please try again', [{ text: 'OK' }])
+    //   },
+    // )
+    setTimeout(() => {
+      onProofGenerated(null)
+    }, 5000)
   }, [onProofGenerated, preprocessedRecordingData, score])
-
 
   return (
     <View style={[styles.container, globalStyles.container]}>
       <RotatingSentences sentences={sentences} />
 
-      <CancelButton onCancel={() => {
-        canceled.current = true
-        onCancelled()
-      }} />
+      <CancelButton
+        onCancel={() => {
+          canceled.current = true
+          onCancelled()
+        }}
+      />
       <LinksSection />
-
     </View>
   )
 }

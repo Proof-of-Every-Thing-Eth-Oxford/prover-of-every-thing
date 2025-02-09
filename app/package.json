@@ -25,6 +25,7 @@
     "expo-gl": "^14.0.2",
     "expo-modules-core": "^1.12.26",
     "fft.js": "^4.0.4",
+    "o1js": "^2.2.0",
     "onnxruntime-react-native": "1.19.2",
     "react": "18.3.1",
     "react-native": "0.75.4",

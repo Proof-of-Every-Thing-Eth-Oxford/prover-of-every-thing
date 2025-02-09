@@ -36,7 +36,6 @@
 		604468F02CE0818D00F9E6B9 /* smaller.vrm in Resources */ = {isa = PBXBuildFile; fileRef = 604468CC2CE07EB300F9E6B9 /* smaller.vrm */; };
 		604468F12CE0818D00F9E6B9 /* abi.json in Resources */ = {isa = PBXBuildFile; fileRef = 604468CE2CE07EB300F9E6B9 /* abi.json */; };
 		604468F22CE0818D00F9E6B9 /* addresses.json in Resources */ = {isa = PBXBuildFile; fileRef = 604468CF2CE07EB300F9E6B9 /* addresses.json */; };
-		604468F32CE0818D00F9E6B9 /* kzg16.srs in Resources */ = {isa = PBXBuildFile; fileRef = 604468D62CE07EB300F9E6B9 /* kzg16.srs */; };
 		604468F42CE0818D00F9E6B9 /* model.compiled in Resources */ = {isa = PBXBuildFile; fileRef = 604468D72CE07EB300F9E6B9 /* model.compiled */; };
 		604468F52CE0818D00F9E6B9 /* network.onnx in Resources */ = {isa = PBXBuildFile; fileRef = 604468D82CE07EB300F9E6B9 /* network.onnx */; };
 		6067A4D42CD5F34B007A5B41 /* CryptoIdolModuleBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 6067A4D22CD5F34B007A5B41 /* CryptoIdolModuleBridge.m */; };
@@ -464,7 +463,6 @@
 				604468F02CE0818D00F9E6B9 /* smaller.vrm in Resources */,
 				604468F12CE0818D00F9E6B9 /* abi.json in Resources */,
 				604468F22CE0818D00F9E6B9 /* addresses.json in Resources */,
-				604468F32CE0818D00F9E6B9 /* kzg16.srs in Resources */,
 				604468F42CE0818D00F9E6B9 /* model.compiled in Resources */,
 				604468F52CE0818D00F9E6B9 /* network.onnx in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
@@ -864,10 +862,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				STRIP_PNG_TEXT = NO;
@@ -942,10 +937,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				STRIP_PNG_TEXT = NO;

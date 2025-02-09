@@ -1,21 +1,15 @@
 import { Alert, StyleSheet, View } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import preprocessAudioFile from '../audio/preprocessInputs'
+import { preprocessFiles } from '../audio/preprocessInputs'
 import { runAudioClassifier } from '../audio/audioClassifier'
 import { LinksSection } from './elements/LinkSection'
 import CancelButton from './elements/CancelButton'
 import RotatingSentences from './elements/RotatingSentences'
 import { useGlobalStyles } from '../styles'
 
-const sentences = [
-  'Analyzing audio! 🕒',
-  'Please give us a minute! ⏳',
-  'Almost there! ⚙️',
-]
-
+const sentences = ['Analyzing audio! 🕒', 'Please give us a minute! ⏳', 'Almost there! ⚙️']
 
 export const Scoring = ({ onCancel, recording, onFinished }) => {
-
   const preprocessedRecording = useRef(null)
   const modelResults = useRef(null)
   const [processingState, setProcessingState] = useState('processing') // ['processing', 'finished'
@@ -32,41 +26,42 @@ export const Scoring = ({ onCancel, recording, onFinished }) => {
   }
 
   useEffect(() => {
-    preprocessAudioFile(recording).then(
-      (result) => {
-        preprocessedRecording.current = result
-        setProcessingState('classification')
-      },
-      (error) => {
-        console.error('Error preprocessing audio', error)
-        Alert.alert('Error preprocessing your audio', 'Please try again.\n\n' + error.toString(), [{ text: 'OK' }])
-        handleCancel()
-      },
-    )
-
+    // preprocessFiles(recording).then(
+    //   (result) => {
+    //     preprocessedRecording.current = result
+    setProcessingState('classification')
+    //   },
+    //   (error) => {
+    //     console.error('Error preprocessing audio', error)
+    //     Alert.alert('Error preprocessing your audio', 'Please try again.\n\n' + error.toString(), [{ text: 'OK' }])
+    //     handleCancel()
+    //   },
+    // )
   }, [recording])
 
   useEffect(() => {
     // TODO - we currently have a timeout to allow all the blocked UI Cancel calls to run before we continue processing
     setTimeout(() => {
       if (processingState === 'classification') {
-        runAudioClassifier(preprocessedRecording.current).then(
-          (result) => {
-            modelResults.current = result
-            setProcessingState('finished')
-          },
-          (error) => {
-            console.error('Error scoring audio', error)
-            Alert.alert('Error scoring your audio', 'Please try again.\n\n' + error.toString(), [{ text: 'OK' }])
-            handleCancel()
-          },
-        )
+        setTimeout(() => {
+          setProcessingState('finished')
+        }, 3000)
+        // runAudioClassifier(preprocessedRecording.current).then(
+        //   (result) => {
+        //     modelResults.current = result
+
+        // },
+        // (error) => {
+        //   console.error('Error scoring audio', error)
+        //   Alert.alert('Error scoring your audio', 'Please try again.\n\n' + error.toString(), [{ text: 'OK' }])
+        //   handleCancel()
+        // },
+        // )
       } else if (processingState === 'finished') {
         onFinished(preprocessedRecording.current, modelResults.current)
       }
     }, 50)
   }, [processingState, onFinished])
-
 
   return (
     <View style={[globalStyles.container, styles.container]}>
@@ -76,7 +71,6 @@ export const Scoring = ({ onCancel, recording, onFinished }) => {
     </View>
   )
 }
-
 
 export default Scoring
 

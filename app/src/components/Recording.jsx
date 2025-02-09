@@ -10,6 +10,8 @@ import { RecordButton } from './elements/RecordButton'
 import { useGlobalStyles } from '../styles'
 import RNFS from 'react-native-fs'
 import { ImageSelector } from './ImageSelector'
+import { Buffer } from 'buffer'
+import { fetchLatestBlockStateHash, getFrequencies, generatePCMData, generateWavHeader } from '../audio/randomAudio'
 
 let sound = null
 // TODO - consider splitting this into recording and recorded components
@@ -36,7 +38,7 @@ export const Recording = ({ onSubmit, state, setState }) => {
   }, [state])
 
   useEffect(() => {
-    ;(async () => await fetchAndPlaySound())()
+    ;(async () => await generateAndPlayAudio())()
   }, [])
 
   // const checkMicrophonePermission = async () => {
@@ -74,6 +76,11 @@ export const Recording = ({ onSubmit, state, setState }) => {
 
     sound.play((success) => {
       if (!success) console.log('Playback failed.')
+      sound.stop(() => {
+        console.log('Sound stopped.')
+        sound.release() // Free up the resources.
+        stopRecord()
+      })
     })
 
     const audioSettings = {
@@ -95,9 +102,6 @@ export const Recording = ({ onSubmit, state, setState }) => {
       })
 
       setRecordFilePath(result) // Set the file path for playback
-      setTimeout(() => {
-        stopRecord()
-      }, 5000)
     } catch (error) {
       console.error('Failed to start recording: ', error)
     }
@@ -156,10 +160,62 @@ export const Recording = ({ onSubmit, state, setState }) => {
       console.debug('Collecting recording file:', recordFilePath)
       return recordFilePath // Return the MP4 file path
     } else {
-      Alert.alert('No Recording', 'Please record a track before submitting.')
+      // Alert.alert('No Recording', 'Please record a track before submitting.')
       return null
     }
   }
+
+  const generateAndPlayAudio = async () => {
+    try {
+      const sampleRate = 44100
+      const durationPerTone = 0.04 // seconds per tone for each character
+
+      const inputString = await fetchLatestBlockStateHash()
+      // Map the 52-character string to an array of frequencies.
+      const frequencies = getFrequencies(inputString)
+
+      // Generate the PCM data (concatenated sine waves).
+      const pcmData = generatePCMData(frequencies, durationPerTone, sampleRate)
+
+      // Calculate the total number of samples.
+      const totalSamples = Math.floor(sampleRate * durationPerTone * frequencies.length)
+
+      // Create the WAV header.
+      const wavHeader = generateWavHeader(totalSamples, sampleRate, 1, 16)
+
+      // Concatenate the header and PCM data into one Uint8Array.
+      const wavFileData = new Uint8Array(wavHeader.length + pcmData.length)
+      wavFileData.set(wavHeader, 0)
+      wavFileData.set(pcmData, wavHeader.length)
+
+      // Define the file path.
+      const filePath = `${RNFS.DocumentDirectoryPath}/string_audio.wav`
+
+      // Write the file as Base64 data.
+      // Using Buffer.from() to handle the raw binary data.
+      const base64Data = Buffer.from(wavFileData).toString('base64')
+      await RNFS.writeFile(filePath, base64Data, 'base64')
+      console.log('WAV file written to:', filePath)
+
+      // Load and play the generated WAV file using react-native-sound.
+      sound = new Sound(filePath, '', (error) => {
+        if (error) {
+          console.log('Error loading sound:', error)
+          Alert.alert('Error', 'Failed to load generated sound')
+          return
+        }
+        // sound.play((success) => {
+        //   if (!success) {
+        //     console.log('Playback failed')
+        //   }
+        // })
+      })
+    } catch (error) {
+      console.error('Error generating or playing audio:', error)
+      Alert.alert('Error', 'An error occurred while generating audio')
+    }
+  }
+
   const fetchAndPlaySound = async () => {
     try {
       const soundUrl = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
