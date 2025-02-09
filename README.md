@@ -33,8 +33,7 @@
 
 Below is a screenshot of the top-level user interface of the app:
 
-![App UI Screenshot](images/screenshot.png)
-
+<img src="images/screenshot.png" alt="App UI Screenshot" width="40%">
 ---
 
 ## Getting Started
