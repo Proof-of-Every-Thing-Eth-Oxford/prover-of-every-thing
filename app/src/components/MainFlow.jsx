@@ -71,7 +71,7 @@ const MainFlow = () => {
 
   useEffect(() => {
     preloadModel().catch((error) => console.error('Error preloading model:', error))
-    setupModelProver().catch((error) => console.error('Error preparing model prover:', error))
+    // setupModelProver().catch((error) => console.error('Error preparing model prover:', error))
   }, [])
 
   return (

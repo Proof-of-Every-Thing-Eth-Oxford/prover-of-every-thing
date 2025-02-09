@@ -17,11 +17,8 @@ export const Proving = ({ score, preprocessedRecordingData, onProofGenerated, on
 
   const globalStyles = useGlobalStyles()
 
-  // TODO - use a real blockchain address when contracts support it
-  const blockchainAddress = 0.08811962604522705
-
   useEffect(() => {
-    const proverInput = generateProverInputJSON(preprocessedRecordingData, score, blockchainAddress)
+    const proverInput = generateProverInputJSON(preprocessedRecordingData, score)
     runModelProver(proverInput).then((proof) => {
         if (canceled.current) {
           console.debug('Proof generated, but canceled')

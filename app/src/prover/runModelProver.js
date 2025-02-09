@@ -6,14 +6,14 @@ import { sleepUntilPreloaded } from '../util/sleepUntilPreloaded'
 const { NativeModelProver } = NativeModules
 
 
-export function generateProverInputJSON(processedMelSpectrogram, modelScore, blockchainAddress) {
+export function generateProverInputJSON(processedMelSpectrogram, modelScore) {
   // Step 1: Flatten the 2D array [128, 130] to a 1D array
   const flattenedData = processedMelSpectrogram.reduce((acc, row) => acc.concat(Array.from(row)), [])
 
   // Step 2: Format as JSON with the flattened array
   const inputJSON = {
-    output_data: [[blockchainAddress], [modelScore]],
-    input_data: [[blockchainAddress], flattenedData],
+    output_data: [[modelScore]],
+    input_data: [flattenedData],
   }
 
   return JSON.stringify(inputJSON)
@@ -21,7 +21,7 @@ export function generateProverInputJSON(processedMelSpectrogram, modelScore, blo
 
 
 export const runModelProver = async (inputData) => {
-  await sleepUntilPreloaded(() => proverAssets, 15000)
+  await sleepUntilPreloaded(() => proverAssets, 30000)
 
   // Prepare input parameter as JSON string with paths
   const inputParam = JSON.stringify({

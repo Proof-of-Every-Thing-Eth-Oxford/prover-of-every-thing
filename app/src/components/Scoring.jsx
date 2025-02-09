@@ -1,6 +1,6 @@
 import { Alert, StyleSheet, View } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import preprocessAudioFile from '../audio/preprocessAudioFile'
+import preprocessAudioFile from '../audio/preprocessInputs'
 import { runAudioClassifier } from '../audio/audioClassifier'
 import { LinksSection } from './elements/LinkSection'
 import CancelButton from './elements/CancelButton'

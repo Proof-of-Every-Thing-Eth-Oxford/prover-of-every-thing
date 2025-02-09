@@ -1,6 +1,7 @@
 import * as ort from 'onnxruntime-react-native'
 import { sleepUntilPreloaded } from '../util/sleepUntilPreloaded'
 import * as RNFS from 'react-native-fs'
+import {preprocessFiles} from "./preprocessInputs";
 
 export let preloadedModelSession = null
 
@@ -25,51 +26,52 @@ export async function preloadModel() {
 }
 
 // Function to prepare the model and run inference
-export async function runAudioClassifier(processedMelSpectrogram, blockchainAddress = 0.08811962604522705) {
+export async function runAudioClassifier(flattenedImage, flattenedChallengeAudio, flattenedRecordedAudio) {
   await sleepUntilPreloaded(() => preloadedModelSession, 3000)
 
   // Run inference and get results
-  return await runInference(preloadedModelSession, processedMelSpectrogram, blockchainAddress)
+  return await runInference(preloadedModelSession, flattenedImage, flattenedChallengeAudio, flattenedRecordedAudio)
 }
 
 // Function to run inference
-async function runInference(session, inputData, blockchainAddress) {
+async function runInference(session, recordingFilePath, challengeFilePath, photoFilePath) {
   const start = new Date()
 
-  // Flatten the 2D array and convert it to Float32Array
-  const flattenedData = inputData.map(row => Array.from(row)).reduce((acc, row) => acc.concat(row), [])
+  const { imageData, challengeData, recordingData } = await preprocessFiles(
+    recordingFilePath,
+    challengeFilePath,
+    photoFilePath
+  )
 
-  // Check if the flattened data has the correct length
-  if (flattenedData.length !== 128 * 130) {
-    throw new Error(`Flattened data length (${flattenedData.length}) does not match expected length (16,640).`)
-  }
-
-  inputData = new Float32Array(flattenedData)
-
-  // Convert blockchainAddress to an input tensor
-  const blockchainAddressTensor = new ort.Tensor('float32', new Float32Array([blockchainAddress]), [1, 1])
-
-  // Set up the model inputs
-  const feeds = {
-    'input': blockchainAddressTensor,                       // blockchainAddress input
-    'input.1': new ort.Tensor('float32', inputData, [1, 1, 128, 130]), // audio data input
-  }
+  const flattenedImage = imageData
+  const flattenedChallengeAudio = challengeData
+  const flattenedRecordedAudio = recordingData
 
   try {
+
+    // Convert input data to Float32Array
+    const imageTensorData = new Float32Array(flattenedImage) // Shape: [1, 256]
+    const challengeAudioTensorData = new Float32Array(flattenedChallengeAudio) // Shape: [1, 1000]
+    const recordedAudioTensorData = new Float32Array(flattenedRecordedAudio) // Shape: [1, 1000]
+
+    // Create ONNX tensors with the correct shape
+    const feeds = {
+      'image_flat': new ort.Tensor('float32', imageTensorData, [1, 256]),
+      'challenge_audio_flat': new ort.Tensor('float32', challengeAudioTensorData, [1, 1000]),
+      'recorded_audio_flat': new ort.Tensor('float32', recordedAudioTensorData, [1, 1000])
+    }
+
+    // // Flatten the 2D array and convert it to Float32Array
+    // const flattenedData = inputData.map(row => Array.from(row)).reduce((acc, row) => acc.concat(row), [])
+
     const outputData = await session.run(feeds)
     const end = new Date()
     const inferenceTime = (end.getTime() - start.getTime()) / 1000
 
     console.debug('Inference time:', inferenceTime, 'seconds')
 
-    // Consistency check for blockchainAddress
-    const outputBlockchainAddress = outputData['output'].data[0]
-    if (outputBlockchainAddress !== blockchainAddress) {
-      throw new Error(`Blockchain address mismatch: expected ${blockchainAddress}, but got ${outputBlockchainAddress}`)
-    }
-
     // Extract the prediction output
-    const prediction = outputData['10'].data[0]
+    const prediction = outputData.output.data[0]
 
     // Only leave 7 decimal places after the decimal point
     return Number(prediction.toFixed(7))

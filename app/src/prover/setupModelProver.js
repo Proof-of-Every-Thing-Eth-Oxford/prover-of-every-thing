@@ -11,7 +11,7 @@ export const setupModelProver = async () => {
 
   const result = await RNFS.readDir(RNFS.MainBundlePath)
   const modelFile = result.find((file) => file.name === 'model.compiled')
-  const srsFile = result.find((file) => file.name === 'kzg16.srs')
+  const srsFile = result.find((file) => file.name === 'kzg18.srs')
 
   if (!modelFile || !srsFile) {
     throw new Error('Prover files not found in iOS main bundle')
